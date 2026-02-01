@@ -251,3 +251,6 @@ while True:
 
     elif user_input == 6:
         view_all_products_with_detailed_information()
+
+    elif user_input == 7:
+        break
