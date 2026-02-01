@@ -1,0 +1,7 @@
+.DS_Store
+*.pyc
+__pycache__/
+*.log
+*.key
+*.pem
+id_*
