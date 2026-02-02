@@ -57,7 +57,7 @@ warehouse_crm/
 
 GitHub: https://github.com/lilsneq
 
-Email: bilmork2407@gmail.com
+Email: 
 
 📄 Лицензия
 Проект распространяется под лицензией MIT.
