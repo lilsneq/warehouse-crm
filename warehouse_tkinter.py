@@ -14,14 +14,12 @@ def show_products():
         text_area.delete(1.0, tk.END)
 
         for company in companies:
-            text_area.insert(tk.END, f"\n{'=' * 60}\n")
+            text_area.insert(tk.END, f"\n{'=' * 70}\n")
             text_area.insert(tk.END, f"🏢 КОМПАНИЯ: {company}\n")
-            text_area.insert(tk.END, f"{'=' * 60}\n")
+            text_area.insert(tk.END, f"{'=' * 70}\n")
 
             for warehouse in companies[company]:
-                text_area.insert(tk.END, "  " + "-" * 50 + "\n")
                 text_area.insert(tk.END, f"\n  📦 СКЛАД: {warehouse}\n")
-                text_area.insert(tk.END, f"{'=' * 60}\n")
 
                 for category in companies[company][warehouse]:
                     text_area.insert(tk.END, f"\n    📁 КАТЕГОРИЯ: {category}\n")
@@ -40,7 +38,7 @@ def show_products():
 def add_product_gui():
     new_window = tk.Toplevel(root)
     new_window.title("Добавить")
-    new_window.geometry("300x400")
+    new_window.geometry("500x600")
     fields = [
         ("Компания:", "company"),
         ("Склад:", "warehouse"),
@@ -83,7 +81,7 @@ def add_product_gui():
 # Создание главного окна
 root = tk.Tk()
 root.title("📦 Управление складом")
-root.geometry("1000x900")
+root.geometry("900x700")
 
 
 title = ttk.Label(root, text="CRM СИСТЕМА СКЛАДА", font=("Arial", 16))
@@ -103,7 +101,7 @@ btn3 = ttk.Button(btn_frame, text="🚪 Выход", command=root.destroy)
 btn3.pack(side=tk.LEFT, padx=5)
 
 # Текстовое поле для вывода
-text_area = scrolledtext.ScrolledText(root, width=70, height=20, font=("Courier New", 20), wrap=tk.NONE, xscrollcommand=True)
+text_area = scrolledtext.ScrolledText(root, width=70, height=40, font=("Courier New", 20), wrap=tk.NONE, xscrollcommand=True)
 text_area.pack(pady=10)
 
 print("Окно создано")
