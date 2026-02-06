@@ -11,9 +11,28 @@ from warehouse_system import (
 
 def show_products():
     try:
-        result = view_all_products_with_detailed_information()
         text_area.delete(1.0, tk.END)
-        text_area.insert(tk.END, result)
+
+        for company in companies:
+            text_area.insert(tk.END, f"\n{'=' * 60}\n")
+            text_area.insert(tk.END, f"🏢 КОМПАНИЯ: {company}\n")
+            text_area.insert(tk.END, f"{'=' * 60}\n")
+
+            for warehouse in companies[company]:
+                text_area.insert(tk.END, "  " + "-" * 50 + "\n")
+                text_area.insert(tk.END, f"\n  📦 СКЛАД: {warehouse}\n")
+                text_area.insert(tk.END, f"{'=' * 60}\n")
+
+                for category in companies[company][warehouse]:
+                    text_area.insert(tk.END, f"\n    📁 КАТЕГОРИЯ: {category}\n")
+
+                    for product_name, product_data in companies[company][warehouse][category].items():
+                        # product_data уже словарь с quantity, price, supplier
+                        text_area.insert(tk.END,
+                                         f"      • {product_name}: {product_data['quantity']} шт, "
+                                         f"{product_data['price']} ₽, поставщик: {product_data['supplier']}\n")
+
+
     except Exception as e:
         text_area.insert(tk.END, f"Ошибка: {e}")
 
@@ -31,6 +50,7 @@ def add_product_gui():
         ("Цена:", "price"),
         ("Поставщик:", "supplier")
     ]
+    # Создать таблицу
 
     entries = {}
     for label_text, key in fields:
@@ -49,6 +69,9 @@ def add_product_gui():
         price = entries['price'].get()
         supplier = entries['supplier'].get()
 
+        add_a_new_product(company, warehouse, category, product,
+                          int(quantity), int(price), supplier)
+
         new_window.destroy()
         print(f"Товар добавлен: {product} в {company}/{warehouse}")
 
@@ -60,7 +83,7 @@ def add_product_gui():
 # Создание главного окна
 root = tk.Tk()
 root.title("📦 Управление складом")
-root.geometry("600x500")
+root.geometry("1000x900")
 
 
 title = ttk.Label(root, text="CRM СИСТЕМА СКЛАДА", font=("Arial", 16))
@@ -80,7 +103,7 @@ btn3 = ttk.Button(btn_frame, text="🚪 Выход", command=root.destroy)
 btn3.pack(side=tk.LEFT, padx=5)
 
 # Текстовое поле для вывода
-text_area = scrolledtext.ScrolledText(root, width=70, height=20)
+text_area = scrolledtext.ScrolledText(root, width=70, height=20, font=("Courier New", 20), wrap=tk.NONE, xscrollcommand=True)
 text_area.pack(pady=10)
 
 print("Окно создано")
