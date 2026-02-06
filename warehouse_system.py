@@ -99,15 +99,10 @@ def Find_the_most_expensive_product_in_the_company():
         print()
 
 
-def add_a_new_product():
+def add_a_new_product(name_company, name_warehouse, name_category, name_product,
+                     name_quantity, name_price, name_supplier):
     """Добавить новый товар"""
-    name_company = input("Название компании: ")
-    name_warehouse = input("Название склада: ")
-    name_category = input("Категория: ")
-    name_product = input("Название товара: ")
-    name_quantity = int(input("Количество: "))
-    name_price = int(input("Цена: "))
-    name_supplier = input("Поставщик: ")
+
 
     #если товара нет
     if name_company not in companies:
@@ -213,45 +208,47 @@ def find_the_supplier_with_the_highest_total_quantity_of_goods():
 
 def view_all_products_with_detailed_information():
     """Просмотреть все товары с детальной информацией"""
+    result_text = ""
     for company in companies:
         for warehouse in companies[company]:
             for category in companies[company][warehouse]:
                 for product in companies[company][warehouse][category]:
-                    print(f"{company} | {warehouse} | {category} | {product}:"
-                          f" {companies[company][warehouse][category][product]['quantity']} шт,"
-                          f" {companies[company][warehouse][category][product]['price']} у.е.,"
-                          f" поставщик: {companies[company][warehouse][category][product]['supplier']}")
+                    # Добавь эту строку перед result_text += ...:
+                    data = companies[company][warehouse][category][product]
+                    result_text += f"{company}/{warehouse}/{category}/{product}: "
+                    result_text += f"{data['quantity']} шт × {data['price']} ₽ = {data['quantity'] * data['price']} ₽ "
+                    result_text += f"({data['supplier']})\n"
+    return result_text
 
-    print()
+if __name__ == "__main__":
+    while True:
 
+        print(*MENU, sep="\n")
+        print()
+        try:
+            user_input = int(input("Введите цифру для действия: "))
+        except ValueError:
+            print("Ошибка: введите число от 1 до 5")
+            continue
 
-while True:
+        if user_input == 1:
+            total_quantity_of_goods()
 
-    print(*MENU, sep="\n")
-    print()
-    try:
-        user_input = int(input("Введите цифру для действия: "))
-    except ValueError:
-        print("Ошибка: введите число от 1 до 5")
-        continue
+        elif user_input == 2:
+            Find_the_most_expensive_product_in_the_company()
 
-    if user_input == 1:
-        total_quantity_of_goods()
+        elif user_input == 3:
+            add_a_new_product()
 
-    elif user_input == 2:
-        Find_the_most_expensive_product_in_the_company()
+        elif user_input == 4:
+            sell_product()
 
-    elif user_input == 3:
-        add_a_new_product()
+        elif user_input == 5:
+            find_the_supplier_with_the_highest_total_quantity_of_goods()
 
-    elif user_input == 4:
-        sell_product()
+        elif user_input == 6:
+            view_all_products_with_detailed_information()
 
-    elif user_input == 5:
-        find_the_supplier_with_the_highest_total_quantity_of_goods()
+        elif user_input == 7:
+            break
 
-    elif user_input == 6:
-        view_all_products_with_detailed_information()
-
-    elif user_input == 7:
-        break
