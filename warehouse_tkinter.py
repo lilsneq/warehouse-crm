@@ -8,6 +8,9 @@ from warehouse_system import (
     sell_product
 )
 
+if __name__ == "__main__":
+    root = tk.Tk()
+
 
 def show_products():
     try:
