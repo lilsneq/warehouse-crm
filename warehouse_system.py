@@ -213,7 +213,6 @@ def view_all_products_with_detailed_information():
         for warehouse in companies[company]:
             for category in companies[company][warehouse]:
                 for product in companies[company][warehouse][category]:
-                    # Добавь эту строку перед result_text += ...:
                     data = companies[company][warehouse][category][product]
                     result_text += f"{company}/{warehouse}/{category}/{product}: "
                     result_text += f"{data['quantity']} шт × {data['price']} ₽ = {data['quantity'] * data['price']} ₽ "
