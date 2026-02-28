@@ -258,3 +258,109 @@ class ViewAllProducts:
         return result_text
 
 
+class FindAProduct:
+    """Поиск продукта по складу"""
+    def __init__(self, companies_data):
+        self.companies = companies_data
+
+
+    def search_by_product_name(self, name):
+        """Поиск названия"""
+        result_text = []
+        for company in self.companies:
+            for warehouse in self.companies[company]:
+                for category in self.companies[company][warehouse]:
+                    for product,data in self.companies[company][warehouse][category]:
+                        if name == product:
+                            result_text.append({
+                                        'company': company,
+                                        'warehouse': warehouse,
+                                        'category': category,
+                                        'product': product,
+                                        'quantity': data['quantity'],
+                                        'price': data['price'],
+                                        'supplier': data['supplier']
+                                    })
+        return result_text
+
+
+    def search_by_company(self, company):
+        """все товары компании"""
+        result_text = []
+        if company in self.companies:
+            for warehouse in self.companies[company]:
+                for category in self.companies[company][warehouse]:
+                    for product,data in self.companies[company][warehouse][category]:
+                        result_text.append({
+                            'company': company,
+                            'warehouse': warehouse,
+                            'category': category,
+                            'product': product,
+                            'quantity': data['quantity'],
+                            'price': data['price'],
+                            'supplier': data['supplier']
+                        })
+
+        return result_text
+
+
+    def search_by_supplier(self, supplier):
+        """поиск по поставщику"""
+        result_text = []
+        for company in self.companies:
+            for warehouse in self.companies[company]:
+                for category in self.companies[company][warehouse]:
+                    for product, data in self.companies[company][warehouse][category]:
+                        if supplier == data['supplier']:
+                            result_text.append({
+                                        'company': company,
+                                        'warehouse': warehouse,
+                                        'category': category,
+                                        'product': product,
+                                        'quantity': data['quantity'],
+                                        'price': data['price'],
+                                        'supplier': data['supplier']
+                                    })
+        return result_text
+
+
+    def search_by_price_range(self, min_price, max_price):
+        """товары в ценовом диапазоне"""
+        result_text = []
+        for company in self.companies:
+            for warehouse in self.companies[company]:
+                for category in self.companies[company][warehouse]:
+                    for product, data in self.companies[company][warehouse][category]:
+                        if min_price <= data['price'] <= max_price:
+                            result_text.append({
+                                        'company': company,
+                                        'warehouse': warehouse,
+                                        'category': category,
+                                        'product': product,
+                                        'quantity': data['quantity'],
+                                        'price': data['price'],
+                                        'supplier': data['supplier']
+                                    })
+        return result_text
+
+
+    def search_by_quantity_range(self, min_qty, max_qty):
+        """товары по количеству"""
+        result_text = []
+        for company in self.companies:
+            for warehouse in self.companies[company]:
+                for category in self.companies[company][warehouse]:
+                    for product, data in self.companies[company][warehouse][category]:
+                        if min_qty <= data['quantity'] <= max_qty:
+                            result_text.append({
+                                        'company': company,
+                                        'warehouse': warehouse,
+                                        'category': category,
+                                        'product': product,
+                                        'quantity': data['quantity'],
+                                        'price': data['price'],
+                                        'supplier': data['supplier']
+                                    })
+        return result_text
+
+
