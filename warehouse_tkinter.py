@@ -7,6 +7,8 @@ from warehouse_system import (
     ProductAdd,
     ProductFind,
     ProductSell,
+    FindAProduct,
+    FindSupplier,
     ProductAdd,
     ViewAllProducts,
     companies_for_warehouse
@@ -101,8 +103,6 @@ def add_product_gui():
         else:  # ошибка
             messagebox.showerror("Ошибка", result[1])
 
-        new_window.destroy()
-        show_products(companies_for_warehouse)
         print(f"Товар добавлен: {product} в {company}/{warehouse}")
 
 
@@ -116,9 +116,106 @@ def export_to_file():
 
 
 def search_products():
-    messagebox.showinfo("Инфо", "Функция экспорта будет добавлена позже")
-    print("Функция поиска будет добавлена позже")
+    """Главное окно поиска"""
+    search_window = tk.Toplevel(root)
+    search_window.title("🔍 Поиск товаров")
+    search_window.geometry("500x600")
 
+    # Поле ввода для поиска по названию
+    tk.Label(search_window, text="Поиск по названию:").pack(pady=5)
+    name_entry = tk.Entry(search_window)
+    name_entry.pack()
+    tk.Button(search_window, text="Искать по названию",
+              command=lambda: search_by_name(name_entry.get())).pack(pady=5)
+
+    # Поиск по компании
+    tk.Label(search_window, text="Поиск по компании:").pack(pady=5)
+    company_entry = tk.Entry(search_window)
+    company_entry.pack()
+    tk.Button(search_window, text="Искать по компании",
+              command=lambda: search_by_company(company_entry.get())).pack(pady=5)
+
+    # Поиск по поставщику
+    tk.Label(search_window, text="Поиск по поставщику:").pack(pady=5)
+    supplier_entry = tk.Entry(search_window)
+    supplier_entry.pack()
+    tk.Button(search_window, text="Искать по поставщику",
+              command=lambda: search_by_supplier(supplier_entry.get())).pack(pady=5)
+
+    # Поиск по цене
+    tk.Label(search_window, text="Диапазон цены:").pack(pady=5)
+    frame_price = tk.Frame(search_window)
+    frame_price.pack()
+    min_price = tk.Entry(frame_price, width=10)
+    min_price.pack(side=tk.LEFT, padx=5)
+    tk.Label(frame_price, text="—").pack(side=tk.LEFT)
+    max_price = tk.Entry(frame_price, width=10)
+    max_price.pack(side=tk.LEFT, padx=5)
+    tk.Button(search_window, text="Искать по цене",
+              command=lambda: search_by_price(int(min_price.get()), int(max_price.get()))).pack(pady=5)
+
+    # Поиск по количеству
+    tk.Label(search_window, text="Диапазон количества:").pack(pady=5)
+    frame_qty = tk.Frame(search_window)
+    frame_qty.pack()
+    min_qty = tk.Entry(frame_qty, width=10)
+    min_qty.pack(side=tk.LEFT, padx=5)
+    tk.Label(frame_qty, text="—").pack(side=tk.LEFT)
+    max_qty = tk.Entry(frame_qty, width=10)
+    max_qty.pack(side=tk.LEFT, padx=5)
+    tk.Button(search_window, text="Искать по количеству",
+              command=lambda: search_by_quantity(int(min_qty.get()), int(max_qty.get()))).pack(pady=5)
+
+
+def search_by_name(name):
+    finder = FindAProduct(companies_for_warehouse)
+    results = finder.search_by_product_name(name)
+    display_search_results(results, f"Результаты поиска по названию '{name}'")
+
+
+def search_by_company(company):
+    finder = FindAProduct(companies_for_warehouse)
+    results = finder.search_by_company(company)
+    display_search_results(results, f"Товары компании '{company}'")
+
+
+def search_by_supplier(supplier):
+    finder = FindAProduct(companies_for_warehouse)
+    results = finder.search_by_supplier(supplier)
+    display_search_results(results, f"Товары поставщика '{supplier}'")
+
+
+def search_by_price(min_p, max_p):
+    finder = FindAProduct(companies_for_warehouse)
+    results = finder.search_by_price_range(min_p, max_p)
+    display_search_results(results, f"Товары от {min_p} до {max_p} ₽")
+
+
+def search_by_quantity(min_q, max_q):
+    finder = FindAProduct(companies_for_warehouse)
+    results = finder.search_by_quantity_range(min_q, max_q)
+    display_search_results(results, f"Товары от {min_q} до {max_q} шт")
+
+
+def display_search_results(results, title):
+    """Показать результаты поиска в главном окне"""
+    text_area.config(state=tk.NORMAL)
+    text_area.delete(1.0, tk.END)
+
+    text_area.insert(tk.END, f"{'=' * 70}\n", "company")
+    text_area.insert(tk.END, f"{title}\n", "company")
+    text_area.insert(tk.END, f"{'=' * 70}\n\n", "company")
+
+    if not results:
+        text_area.insert(tk.END, "Ничего не найдено\n")
+    else:
+        for item in results:
+            text_area.insert(tk.END,
+                             f"• {item['product']}: {item['quantity']} шт, {item['price']} ₽\n"
+                             f"  Компания: {item['company']}, Склад: {item['warehouse']}\n"
+                             f"  Категория: {item['category']}, Поставщик: {item['supplier']}\n\n")
+
+    text_area.config(state=tk.DISABLED)
 
 # Создание главного окна
 root = tk.Tk()
