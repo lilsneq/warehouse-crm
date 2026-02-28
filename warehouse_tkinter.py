@@ -2,16 +2,17 @@ import tkinter as tk
 import time
 from tkinter import messagebox
 from tkinter import ttk, scrolledtext
+from json_storage import JSONStorage
 from warehouse_system import (
     ProductQuantity,
-    ProductAdd,
     ProductFind,
     ProductSell,
     FindAProduct,
     FindSupplier,
     ProductAdd,
     ViewAllProducts,
-    companies_for_warehouse
+    companies_for_warehouse,
+    export_to_file
 
 )
 
@@ -111,8 +112,12 @@ def add_product_gui():
 
 
 def export_to_file():
-    messagebox.showinfo("Инфо", "Функция экспорта будет добавлена позже")
-    print("Функция экспорта будет добавлена позже")
+    storage = JSONStorage()
+    success, message = storage.save_data_json(companies_for_warehouse)
+    if success:
+        messagebox.showinfo("Успех", message)
+    else:
+        messagebox.showerror("Ошибка", message)
 
 
 def search_products():
@@ -217,10 +222,35 @@ def display_search_results(results, title):
 
     text_area.config(state=tk.DISABLED)
 
+
+
 # Создание главного окна
 root = tk.Tk()
 root.title("📦 Управление складом")
 root.geometry("900x700")
+
+
+# ЗАГРУЗКА JSON ФАЙЛА ПРИ СТАРТЕ ПРОГРАММЫ
+def load_data_on_start():
+    storage = JSONStorage()
+
+    if messagebox.askyesno("Загрузка", "Загрузить данные из файла?"):
+        success, data = storage.load_data()
+        if success and data:
+            global companies_for_warehouse
+            companies_for_warehouse = data
+            messagebox.showinfo("Успех", f"Загружено {len(data)} компаний")  # опционально
+            print(f"Данные загружены из файла")
+
+        else:
+            messagebox.showerror("Ошибка", "Не удалось загрузить файл")
+            print("Ошибка при загрузки, используются данные по умолчанию")
+    else:
+        print("Используются данные по умолчанию")
+
+    show_products(companies_for_warehouse)
+
+
 
 
 title = ttk.Label(root, text="CRM СИСТЕМА СКЛАДА", font=("Arial", 16))
@@ -259,6 +289,8 @@ text_area.pack(pady=10)
 
 
 
+# Вызов загрузки json
+load_data_on_start()
 
 print("Окно создано")
 root.mainloop()
