@@ -1,5 +1,8 @@
 # Иерархия: Компания → Склад → Категория → Товар
 # Система управления складом версия 2.0
+from curses.ascii import isdigit
+from os import pread
+from tkinter.font import names
 
 companies = {
     'TechCorp': {
@@ -44,146 +47,189 @@ MENU = ["1. Общее количество товара по названию �
         "7. Выйти"
 ]
 
+class ProductQuantity:
+    def total_quantity_of_goods(self):
+        """Общее количество товара по названию во всех складах"""
+        product_name = input("Введите название товара: ")
+        total = 0
 
-def total_quantity_of_goods():
-    """Общее количество товара по названию во всех складах"""
-    product_name = input("Введите название товара: ")
-    total = 0
+        for company in companies:
+            for warehouse in companies[company]:
+                for category in companies[company][warehouse]:
+                    if product_name in companies[company][warehouse][category]:
+                        total += companies[company][warehouse][category][product_name]['quantity']
 
-    for company in companies:
-        for warehouse in companies[company]:
-            for category in companies[company][warehouse]:
-                if product_name in companies[company][warehouse][category]:
-                    total += companies[company][warehouse][category][product_name]['quantity']
-
-    print(f"Общее количетсво {product_name}: {total}")
-    print()
-    return total
-
-
-def Find_the_most_expensive_product_in_the_company():
-    """Найти самый дорогой товар в компании"""
-
-    company_name = input("Ведите название компании: ")
-    if company_name not in companies:
-        print("Такой компании нет")
+        print(f"Общее количетсво {product_name}: {total}")
         print()
-        return
+        return total
 
-    max_price = 0
-    product_info = {}
 
-    for warehouse in companies[company_name]:
-        for category in companies[company_name][warehouse]:
-            for products in companies[company_name][warehouse][category]:
-                price = companies[company_name][warehouse][category][products]['price']
+class ProductFind:
+    def Find_the_most_expensive_product_in_the_company(self):
+        """Найти самый дорогой товар в компании"""
 
-                if price > max_price:
-                    max_price = price
-                    product_info =  {
-                        'warehouse': warehouse,
-                        'category': category,
-                        'products': products,
-                        'price': price,
-                        'quantity': companies[company_name][warehouse][category][products]['quantity']
+        company_name = input("Ведите название компании: ")
+        if company_name not in companies:
+            print("Такой компании нет")
+            print()
+            return
+
+        max_price = 0
+        product_info = {}
+
+        for warehouse in companies[company_name]:
+            for category in companies[company_name][warehouse]:
+                for products in companies[company_name][warehouse][category]:
+                    price = companies[company_name][warehouse][category][products]['price']
+
+                    if price > max_price:
+                        max_price = price
+                        product_info =  {
+                            'warehouse': warehouse,
+                            'category': category,
+                            'products': products,
+                            'price': price,
+                            'quantity': companies[company_name][warehouse][category][products]['quantity']
+                        }
+
+        if product_info:
+            print()
+            print(f"Самый дорогой товар в {company_name}:")
+            print(f"Склад: {product_info["warehouse"]}")
+            print(f"Категория: {product_info["category"]}")
+            print(f"Товар: {product_info["products"]}")
+            print(f"Цена: {product_info["price"]}")
+            print(f"Количество: {product_info["quantity"]}")
+            print()
+
+
+class ProductAdd:
+    def add_a_new_product(self, name_company, name_warehouse, name_category, name_product,
+                         name_quantity, name_price, name_supplier):
+        """Добавить новый товар"""
+        #если товара нет
+        if name_company not in companies:
+            companies[name_company] = {}
+        if name_warehouse not in companies[name_company]:
+            companies[name_company][name_warehouse] = {}
+        if name_category not in companies[name_company][name_warehouse]:
+            companies[name_company][name_warehouse][name_category] = {}
+
+        #если товар всё таки есть
+        if name_product in companies[name_company][name_warehouse][name_category]:
+            print("1 - Добавить к существующему количеству")
+            print("2 - Перезаписать товар")
+            print("3 - Отмена")
+            choice = input("Выберите действие: ")
+
+            if choice == "1":
+                companies[name_company][name_warehouse][name_category][name_product]["quantity"] += name_quantity
+
+                update = input("Обновить цену и поставщика? (да/нет): ")
+                if update.lower() == "да":
+                    companies[name_company][name_warehouse][name_category][name_product]['price'] = name_price
+                    companies[name_company][name_warehouse][name_category][name_product]["supplier"] = name_supplier
+
+                print("КОЛИЧЕСТВО УСПЕШНО ОБНОВЛЕНО!")
+                return
+
+            elif choice == "2":
+                print(f"Ваш товар перезаписан {name_quantity}")
+                pass
+
+            elif choice == "3":
+                print("Вы вышли")
+                return
+
+            else:
+                print("ОШИБКА")
+                return
+
+        companies[name_company][name_warehouse][name_category][name_product] = {
+            'quantity': name_quantity,
+            'price': name_price,
+            'supplier': name_supplier
                     }
 
-    if product_info:
-        print()
-        print(f"Самый дорогой товар в {company_name}:")
-        print(f"Склад: {product_info["warehouse"]}")
-        print(f"Категория: {product_info["category"]}")
-        print(f"Товар: {product_info["products"]}")
-        print(f"Цена: {product_info["price"]}")
-        print(f"Количество: {product_info["quantity"]}")
-        print()
+
+class ProductSell:
+    def set_sale_data(self, company, warehouse, category, product, quantity):
+        self.name_company = company
+        self.name_warehouse = warehouse
+        self.name_category = category
+        self.name_product = product
+
+        if quantity.isdigit():
+            self.name_quantity = int(quantity)
 
 
-def add_a_new_product(name_company, name_warehouse, name_category, name_product,
-                     name_quantity, name_price, name_supplier):
-    """Добавить новый товар"""
+    def sell_product(self):
+        """Продать товар"""
+        if not self.name_company:
+            return False
+        if not self.name_warehouse:
+            return False
+        if not self.name_category:
+            return False
+        if not self.name_product:
+            return False
+        if not self.name_quantity:
+            return False
+        if not self._check_company():
+            return False
+        if not self._check_warehouse():
+            return False
+        if not self._check_category():
+            return False
+        if not self._check_product():
+            return False
+        if not self._check_quantity():
+            return False
+
+        self._update_quantity()
+        self._check_if_empty_and_delete()
+        return True
 
 
-    #если товара нет
-    if name_company not in companies:
-        companies[name_company] = {}
-    if name_warehouse not in companies[name_company]:
-        companies[name_company][name_warehouse] = {}
-    if name_category not in companies[name_company][name_warehouse]:
-        companies[name_company][name_warehouse][name_category] = {}
 
-    #если товар всё таки есть
-    if name_product in companies[name_company][name_warehouse][name_category]:
-        print("1 - Добавить к существующему количеству")
-        print("2 - Перезаписать товар")
-        print("3 - Отмена")
-        choice = input("Выберите действие: ")
+    def _check_company(self):
+        """Проверка компании"""
+        return self.name_company in companies
 
-        if choice == "1":
-            companies[name_company][name_warehouse][name_category][name_product]["quantity"] += name_quantity
 
-            update = input("Обновить цену и поставщика? (да/нет): ")
-            if update.lower() == "да":
-                companies[name_company][name_warehouse][name_category][name_product]['price'] = name_price
-                companies[name_company][name_warehouse][name_category][name_product]["supplier"] = name_supplier
+    def _check_warehouse(self):
+        """Проверка склада"""
+        return self.name_warehouse in companies[self.name_company]
 
-            print("КОЛИЧЕСТВО УСПЕШНО ОБНОВЛЕНО!")
-            return
 
-        elif choice == "2":
-            print(f"Ваш товар перезаписан {name_quantity}")
-            pass
+    def _check_category(self):
+        """Проверка категории"""
+        return self.name_category in companies[self.name_company][self.name_warehouse]
 
-        elif choice == "3":
-            print("Вы вышли")
-            return
 
-        else:
-            print("ОШИБКА")
-            return
+    def _check_product(self):
+        """Проверка продукта"""
+        return self.name_product in companies[self.name_company][self.name_warehouse][self.name_category]
 
-    companies[name_company][name_warehouse][name_category][name_product] = {
-        'quantity': name_quantity,
-        'price': name_price,
-        'supplier': name_supplier
-                }
 
-def sell_product():
-    """Продать товар"""
-    name_company = input("Название компании: ")
-    name_warehouse = input("Название склада: ")
-    name_category = input("Категория: ")
-    name_product = input("Название товара: ")
-    name_quantity = int(input("Количество: "))
+    def _check_quantity(self):
+        """Проверка количества"""
+        product = companies[self.name_company][self.name_warehouse][self.name_category][self.name_product]['quantity']
+        return self.name_quantity <= product
 
-    if name_company in companies:
-        if name_warehouse in companies[name_company]:
-            if name_category in companies[name_company][name_warehouse]:
-                if name_product in companies[name_company][name_warehouse][name_category]:
-                    if name_quantity <= companies[name_company][name_warehouse][name_category][name_product]["quantity"]:
-                        companies[name_company][name_warehouse][name_category][name_product]["quantity"] -= name_quantity
-                        print(f"Продано {name_quantity} шт. | Осталось {companies[name_company][name_warehouse][name_category][name_product]["quantity"]}")
 
-                        if companies[name_company][name_warehouse][name_category][name_product]["quantity"] <= 0:
-                            print("Товара нет, вы хотите удалить его?: ")
-                            del_user = input("да/нет")
+    def _update_quantity(self):
+        """Вычитание товара из количества"""
+        product = companies[self.name_company][self.name_warehouse][self.name_category][self.name_product]
+        product["quantity"] -= self.name_quantity
 
-                            if del_user.lower() == "да":
-                                del companies[name_company][name_warehouse][name_category][name_product]
 
-                            else:
-                                return
+    def _check_if_empty_and_delete(self):
+        """Удаление товара если его меньше 0"""
+        if companies[self.name_company][self.name_warehouse][self.name_category][self.name_product]["quantity"] <= 0:
+            del companies[self.name_company][self.name_warehouse][self.name_category][self.name_product]
 
-                    else:
-                        print("Товара не достаточно")
-                else:
-                    print("Продукт не найдет")
-            else:
-                print("Категория не найдена")
-        else:
-            print("Ошибка склад не найден")
-    else:
-        print("Ошибка компания не найдена")
+
 
 
 def find_the_supplier_with_the_highest_total_quantity_of_goods():
@@ -219,35 +265,4 @@ def view_all_products_with_detailed_information():
                     result_text += f"({data['supplier']})\n"
     return result_text
 
-if __name__ == "__main__":
-    while True:
-
-        print(*MENU, sep="\n")
-        print()
-        try:
-            user_input = int(input("Введите цифру для действия: "))
-        except ValueError:
-            print("Ошибка: введите число от 1 до 5")
-            continue
-
-        if user_input == 1:
-            total_quantity_of_goods()
-
-        elif user_input == 2:
-            Find_the_most_expensive_product_in_the_company()
-
-        elif user_input == 3:
-            add_a_new_product()
-
-        elif user_input == 4:
-            sell_product()
-
-        elif user_input == 5:
-            find_the_supplier_with_the_highest_total_quantity_of_goods()
-
-        elif user_input == 6:
-            view_all_products_with_detailed_information()
-
-        elif user_input == 7:
-            break
 
