@@ -231,25 +231,32 @@ class ProductSell:
 
 
 
-
-def find_the_supplier_with_the_highest_total_quantity_of_goods():
+class FindSupplier:
     """Найти поставщика с наибольшим общим количеством товаров"""
-    supplier_totals = {}
-
-    for company in companies:
-        for warehouse in companies[company]:
-            for category in companies[company][warehouse]:
-                for product in companies[company][warehouse][category]:
-                    supplier_x = companies[company][warehouse][category][product]['supplier']
-                    quantity_x = companies[company][warehouse][category][product]['quantity']
-                    if supplier_x not in supplier_totals:
-                        supplier_totals[supplier_x] = 0
-                    supplier_totals[supplier_x] += quantity_x
+    def __init__(self, companies_data):
+        self.companies = companies_data
 
 
-    best_supplier = max(supplier_totals.items(), key=lambda x: x[1])
-    print(f"{best_supplier[0]} | {best_supplier[1]}")
-    print()
+    def find_the_supplier_with_the_highest_total_quantity_of_goods(self):
+        """Поиск поставщика"""
+        supplier_totals = {}
+
+        if not supplier_totals:
+            return None
+
+        for company in self.companies:
+            for warehouse in self.companies[company]:
+                for category in self.companies[company][warehouse]:
+                    for product in self.companies[company][warehouse][category]:
+                        supplier_x = self.companies[company][warehouse][category][product]['supplier']
+                        quantity_x = self.companies[company][warehouse][category][product]['quantity']
+                        if supplier_x not in supplier_totals:
+                            supplier_totals[supplier_x] = 0
+                        supplier_totals[supplier_x] += quantity_x
+
+
+        best_supplier = max(supplier_totals.items(), key=lambda x: x[1])
+        return best_supplier
 
 
 class ViewAllProducts:
