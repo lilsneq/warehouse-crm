@@ -58,7 +58,7 @@ class ProductQuantity:
         return total
 
 
-class ProductFind:
+class ProductFindMax:
     """ПОИСК САМОГО ДОРОГОГО ТОВАРА КОМПАНИИ"""
     def __init__(self, companies_data):
         self.companies = companies_data
