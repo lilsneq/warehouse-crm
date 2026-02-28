@@ -5,7 +5,6 @@ from tkinter import ttk, scrolledtext
 from json_storage import JSONStorage
 from warehouse_system import (
     ProductQuantity,
-    ProductFind,
     ProductSell,
     FindAProduct,
     FindSupplier,
