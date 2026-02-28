@@ -48,19 +48,21 @@ MENU = ["1. Общее количество товара по названию �
 ]
 
 class ProductQuantity:
-    def total_quantity_of_goods(self):
+    def __init__(self, companies_data):
+        self.companies = companies_data
+
+
+    def total_quantity_of_goods(self, product_name):
         """Общее количество товара по названию во всех складах"""
-        product_name = input("Введите название товара: ")
+
         total = 0
 
-        for company in companies:
-            for warehouse in companies[company]:
-                for category in companies[company][warehouse]:
-                    if product_name in companies[company][warehouse][category]:
-                        total += companies[company][warehouse][category][product_name]['quantity']
+        for company in self.companies:
+            for warehouse in self.companies[company]:
+                for category in self.companies[company][warehouse]:
+                    if product_name in self.companies[company][warehouse][category]:
+                        total += self.companies[company][warehouse][category][product_name]['quantity']
 
-        print(f"Общее количетсво {product_name}: {total}")
-        print()
         return total
 
 
