@@ -1,6 +1,6 @@
 import tkinter as tk
 import time
-
+from tkinter import messagebox
 from tkinter import ttk, scrolledtext
 from warehouse_system import (
     ProductQuantity,
@@ -16,8 +16,7 @@ from warehouse_system import (
 
 
 
-def show_products(companies):
-    viewer = ViewAllProducts(companies_for_warehouse)
+def show_products(companies_for_warehouse):
 
     #настройка тегов
     text_area.tag_config("company", foreground="blue", font=("Arial", 12, "bold"))
@@ -92,8 +91,15 @@ def add_product_gui():
             return
 
         adder = ProductAdd()
-        adder.add_a_new_product(company, warehouse, category, product,
+        result = adder.add_a_new_product(company, warehouse, category, product,
                                 int(quantity), int(price), supplier)
+
+        if result[0]:  # успех
+            messagebox.showinfo("Успех", result[1])
+            new_window.destroy()
+            show_products(companies_for_warehouse)
+        else:  # ошибка
+            messagebox.showerror("Ошибка", result[1])
 
         new_window.destroy()
         show_products(companies_for_warehouse)
