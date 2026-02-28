@@ -110,39 +110,18 @@ class ProductAdd:
 
         #если товар всё таки есть
         if name_product in companies_for_warehouse[name_company][name_warehouse][name_category]:
-            print("1 - Добавить к существующему количеству")
-            print("2 - Перезаписать товар")
-            print("3 - Отмена")
-            choice = input("Выберите действие: ")
+            companies_for_warehouse[name_company][name_warehouse][name_category][name_product]["quantity"] += name_quantity
+            companies_for_warehouse[name_company][name_warehouse][name_category][name_product]['price'] = name_price
+            companies_for_warehouse[name_company][name_warehouse][name_category][name_product]["supplier"] = name_supplier
+            return (True, 'Товар обновлён')
 
-            if choice == "1":
-                companies_for_warehouse[name_company][name_warehouse][name_category][name_product]["quantity"] += name_quantity
-
-                update = input("Обновить цену и поставщика? (да/нет): ")
-                if update.lower() == "да":
-                    companies_for_warehouse[name_company][name_warehouse][name_category][name_product]['price'] = name_price
-                    companies_for_warehouse[name_company][name_warehouse][name_category][name_product]["supplier"] = name_supplier
-
-                print("КОЛИЧЕСТВО УСПЕШНО ОБНОВЛЕНО!")
-                return
-
-            elif choice == "2":
-                print(f"Ваш товар перезаписан {name_quantity}")
-                pass
-
-            elif choice == "3":
-                print("Вы вышли")
-                return
-
-            else:
-                print("ОШИБКА")
-                return
-
+        #если товара нет
         companies_for_warehouse[name_company][name_warehouse][name_category][name_product] = {
             'quantity': name_quantity,
             'price': name_price,
             'supplier': name_supplier
                     }
+        return (True, 'Товар добавлен')
 
 
 class ProductSell:
