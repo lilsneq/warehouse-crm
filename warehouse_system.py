@@ -1,8 +1,8 @@
 # Иерархия: Компания → Склад → Категория → Товар
 # Система управления складом версия 2.0
-from curses.ascii import isdigit
-from os import pread
-from tkinter.font import names
+from json_storage import JSONStorage
+from tkinter import messagebox
+
 
 companies_for_warehouse = {
     'TechCorp': {
@@ -219,15 +219,14 @@ class FindSupplier:
         """Поиск поставщика"""
         supplier_totals = {}
 
-        if not supplier_totals:
-            return None
-
         for company in self.companies:
             for warehouse in self.companies[company]:
                 for category in self.companies[company][warehouse]:
                     for product in self.companies[company][warehouse][category]:
                         supplier_x = self.companies[company][warehouse][category][product]['supplier']
                         quantity_x = self.companies[company][warehouse][category][product]['quantity']
+                        if not supplier_totals:
+                            return None
                         if supplier_x not in supplier_totals:
                             supplier_totals[supplier_x] = 0
                         supplier_totals[supplier_x] += quantity_x
@@ -366,3 +365,8 @@ class FindAProduct:
         return result_text
 
 
+def export_to_file():
+    """Сохранение данных в JSON файл (вызывается из GUI)"""
+    storage = JSONStorage()
+    success, message = storage.save_data_json(companies_for_warehouse)
+    return success, message
