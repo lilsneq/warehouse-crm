@@ -4,7 +4,7 @@ from curses.ascii import isdigit
 from os import pread
 from tkinter.font import names
 
-companies = {
+companies_for_warehouse = {
     'TechCorp': {
         'main_warehouse': {
             'electronics': {
@@ -37,15 +37,6 @@ companies = {
     }
 }
 
-
-MENU = ["1. Общее количество товара по названию во всех складах",
-        "2. Найти самый дорогой товар в компании",
-        "3. Добавить новый товар",
-        "4. Продать товар",
-        "5. Найти поставщика с наибольшим общим количеством товаров",
-        "6. Просмотреть все товары с детальной информацией",
-        "7. Выйти"
-]
 
 class ProductQuantity:
     def __init__(self, companies_data):
@@ -108,29 +99,29 @@ class ProductAdd:
                          name_quantity, name_price, name_supplier):
         """Добавить новый товар"""
 
-        global companies
+        global companies_for_warehouse
 
-        if name_company not in companies:
-            companies[name_company] = {}
-        if name_warehouse not in companies[name_company]:
-            companies[name_company][name_warehouse] = {}
-        if name_category not in companies[name_company][name_warehouse]:
-            companies[name_company][name_warehouse][name_category] = {}
+        if name_company not in companies_for_warehouse:
+            companies_for_warehouse[name_company] = {}
+        if name_warehouse not in companies_for_warehouse[name_company]:
+            companies_for_warehouse[name_company][name_warehouse] = {}
+        if name_category not in companies_for_warehouse[name_company][name_warehouse]:
+            companies_for_warehouse[name_company][name_warehouse][name_category] = {}
 
         #если товар всё таки есть
-        if name_product in companies[name_company][name_warehouse][name_category]:
+        if name_product in companies_for_warehouse[name_company][name_warehouse][name_category]:
             print("1 - Добавить к существующему количеству")
             print("2 - Перезаписать товар")
             print("3 - Отмена")
             choice = input("Выберите действие: ")
 
             if choice == "1":
-                companies[name_company][name_warehouse][name_category][name_product]["quantity"] += name_quantity
+                companies_for_warehouse[name_company][name_warehouse][name_category][name_product]["quantity"] += name_quantity
 
                 update = input("Обновить цену и поставщика? (да/нет): ")
                 if update.lower() == "да":
-                    companies[name_company][name_warehouse][name_category][name_product]['price'] = name_price
-                    companies[name_company][name_warehouse][name_category][name_product]["supplier"] = name_supplier
+                    companies_for_warehouse[name_company][name_warehouse][name_category][name_product]['price'] = name_price
+                    companies_for_warehouse[name_company][name_warehouse][name_category][name_product]["supplier"] = name_supplier
 
                 print("КОЛИЧЕСТВО УСПЕШНО ОБНОВЛЕНО!")
                 return
@@ -147,7 +138,7 @@ class ProductAdd:
                 print("ОШИБКА")
                 return
 
-        companies[name_company][name_warehouse][name_category][name_product] = {
+        companies_for_warehouse[name_company][name_warehouse][name_category][name_product] = {
             'quantity': name_quantity,
             'price': name_price,
             'supplier': name_supplier
@@ -196,40 +187,40 @@ class ProductSell:
 
     def _check_company(self):
         """Проверка компании"""
-        return self.name_company in companies
+        return self.name_company in companies_for_warehouse
 
 
     def _check_warehouse(self):
         """Проверка склада"""
-        return self.name_warehouse in companies[self.name_company]
+        return self.name_warehouse in companies_for_warehouse[self.name_company]
 
 
     def _check_category(self):
         """Проверка категории"""
-        return self.name_category in companies[self.name_company][self.name_warehouse]
+        return self.name_category in companies_for_warehouse[self.name_company][self.name_warehouse]
 
 
     def _check_product(self):
         """Проверка продукта"""
-        return self.name_product in companies[self.name_company][self.name_warehouse][self.name_category]
+        return self.name_product in companies_for_warehouse[self.name_company][self.name_warehouse][self.name_category]
 
 
     def _check_quantity(self):
         """Проверка количества"""
-        product = companies[self.name_company][self.name_warehouse][self.name_category][self.name_product]['quantity']
+        product = companies_for_warehouse[self.name_company][self.name_warehouse][self.name_category][self.name_product]['quantity']
         return self.name_quantity <= product
 
 
     def _update_quantity(self):
         """Вычитание товара из количества"""
-        product = companies[self.name_company][self.name_warehouse][self.name_category][self.name_product]
+        product = companies_for_warehouse[self.name_company][self.name_warehouse][self.name_category][self.name_product]
         product["quantity"] -= self.name_quantity
 
 
     def _check_if_empty_and_delete(self):
         """Удаление товара если его меньше 0"""
-        if companies[self.name_company][self.name_warehouse][self.name_category][self.name_product]["quantity"] <= 0:
-            del companies[self.name_company][self.name_warehouse][self.name_category][self.name_product]
+        if companies_for_warehouse[self.name_company][self.name_warehouse][self.name_category][self.name_product]["quantity"] <= 0:
+            del companies_for_warehouse[self.name_company][self.name_warehouse][self.name_category][self.name_product]
 
 
 
