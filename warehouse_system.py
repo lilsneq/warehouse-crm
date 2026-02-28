@@ -39,6 +39,7 @@ companies_for_warehouse = {
 
 
 class ProductQuantity:
+    """НАИБОЛЬШЕЕ КОЛИЧЕСТВО ТОВАРА НА СКЛАДЕ"""
     def __init__(self, companies_data):
         self.companies = companies_data
 
@@ -95,6 +96,7 @@ class ProductFind:
 
 
 class ProductAdd:
+    """ДОБАВЛЕНИЕ ТОВАРА"""
     def add_a_new_product(self, name_company, name_warehouse, name_category, name_product,
                          name_quantity, name_price, name_supplier):
         """Добавить новый товар"""
@@ -128,6 +130,7 @@ class ProductAdd:
 
 
 class ProductSell:
+    """ПРОДАЖА ТОВАРА"""
     def set_sale_data(self, company, warehouse, category, product, quantity):
         self.name_company = company
         self.name_warehouse = warehouse
