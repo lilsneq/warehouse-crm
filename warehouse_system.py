@@ -108,6 +108,9 @@ class ProductAdd:
         if name_category not in companies_for_warehouse[name_company][name_warehouse]:
             companies_for_warehouse[name_company][name_warehouse][name_category] = {}
 
+        if name_quantity <= 0:
+            return (False, "Количество должно быть положительным")
+
         #если товар всё таки есть
         if name_product in companies_for_warehouse[name_company][name_warehouse][name_category]:
             companies_for_warehouse[name_company][name_warehouse][name_category][name_product]["quantity"] += name_quantity
