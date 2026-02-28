@@ -65,22 +65,28 @@ class ProductQuantity:
 
 
 class ProductFind:
-    def Find_the_most_expensive_product_in_the_company(self):
-        """Найти самый дорогой товар в компании"""
+    """ПОИСК САМОГО ДОРОГОГО ТОВАРА КОМПАНИИ"""
+    def __init__(self, companies_data):
+        self.companies = companies_data
 
-        company_name = input("Ведите название компании: ")
-        if company_name not in companies:
-            print("Такой компании нет")
-            print()
-            return
+
+    def _check_company(self, company):
+        """Проверка компании"""
+        return company in self.companies
+
+
+    def Find_the_most_expensive_product_in_the_company(self, company):
+        """Найти самый дорогой товар в компании"""
+        if not self._check_company(company):
+            return None
 
         max_price = 0
         product_info = {}
 
-        for warehouse in companies[company_name]:
-            for category in companies[company_name][warehouse]:
-                for products in companies[company_name][warehouse][category]:
-                    price = companies[company_name][warehouse][category][products]['price']
+        for warehouse in self.companies[company]:
+            for category in self.companies[company][warehouse]:
+                for products in self.companies[company][warehouse][category]:
+                    price = self.companies[company][warehouse][category][products]['price']
 
                     if price > max_price:
                         max_price = price
@@ -89,18 +95,10 @@ class ProductFind:
                             'category': category,
                             'products': products,
                             'price': price,
-                            'quantity': companies[company_name][warehouse][category][products]['quantity']
+                            'quantity': self.companies[company][warehouse][category][products]['quantity']
                         }
 
-        if product_info:
-            print()
-            print(f"Самый дорогой товар в {company_name}:")
-            print(f"Склад: {product_info["warehouse"]}")
-            print(f"Категория: {product_info["category"]}")
-            print(f"Товар: {product_info["products"]}")
-            print(f"Цена: {product_info["price"]}")
-            print(f"Количество: {product_info["quantity"]}")
-            print()
+        return product_info
 
 
 class ProductAdd:
@@ -252,17 +250,24 @@ def find_the_supplier_with_the_highest_total_quantity_of_goods():
     print()
 
 
-def view_all_products_with_detailed_information():
+class ViewAllProducts:
     """Просмотреть все товары с детальной информацией"""
-    result_text = ""
-    for company in companies:
-        for warehouse in companies[company]:
-            for category in companies[company][warehouse]:
-                for product in companies[company][warehouse][category]:
-                    data = companies[company][warehouse][category][product]
-                    result_text += f"{company}/{warehouse}/{category}/{product}: "
-                    result_text += f"{data['quantity']} шт × {data['price']} ₽ = {data['quantity'] * data['price']} ₽ "
-                    result_text += f"({data['supplier']})\n"
-    return result_text
+    def __init__(self, companies_data):
+        self.companies = companies_data
+
+
+
+    def view_all_products_with_detailed_information(self):
+        """Просмотреть все товары"""
+        result_text = ""
+        for company in self.companies:
+            for warehouse in self.companies[company]:
+                for category in self.companies[company][warehouse]:
+                    for product in self.companies[company][warehouse][category]:
+                        data = self.companies[company][warehouse][category][product]
+                        result_text += f"{company}/{warehouse}/{category}/{product}: "
+                        result_text += f"{data['quantity']} шт × {data['price']} ₽ = {data['quantity'] * data['price']} ₽ "
+                        result_text += f"({data['supplier']})\n"
+        return result_text
 
 
