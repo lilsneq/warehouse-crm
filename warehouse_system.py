@@ -107,7 +107,9 @@ class ProductAdd:
     def add_a_new_product(self, name_company, name_warehouse, name_category, name_product,
                          name_quantity, name_price, name_supplier):
         """Добавить новый товар"""
-        #если товара нет
+
+        global companies
+
         if name_company not in companies:
             companies[name_company] = {}
         if name_warehouse not in companies[name_company]:
