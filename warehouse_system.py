@@ -270,8 +270,8 @@ class FindAProduct:
         for company in self.companies:
             for warehouse in self.companies[company]:
                 for category in self.companies[company][warehouse]:
-                    for product,data in self.companies[company][warehouse][category]:
-                        if name == product:
+                    for product,data in self.companies[company][warehouse][category].items():
+                        if name.lower().strip() == product.lower().strip():
                             result_text.append({
                                         'company': company,
                                         'warehouse': warehouse,
@@ -287,12 +287,14 @@ class FindAProduct:
     def search_by_company(self, company):
         """все товары компании"""
         result_text = []
-        if company in self.companies:
-            for warehouse in self.companies[company]:
-                for category in self.companies[company][warehouse]:
-                    for product,data in self.companies[company][warehouse][category]:
+        companies_lower = {k.lower(): k for k in self.companies}
+        if company.lower() in companies_lower:
+            real_company = companies_lower[company.lower()]
+            for warehouse in self.companies[real_company]:
+                for category in self.companies[real_company][warehouse]:
+                    for product,data in self.companies[real_company][warehouse][category].items():
                         result_text.append({
-                            'company': company,
+                            'company': real_company,
                             'warehouse': warehouse,
                             'category': category,
                             'product': product,
@@ -310,8 +312,8 @@ class FindAProduct:
         for company in self.companies:
             for warehouse in self.companies[company]:
                 for category in self.companies[company][warehouse]:
-                    for product, data in self.companies[company][warehouse][category]:
-                        if supplier == data['supplier']:
+                    for product, data in self.companies[company][warehouse][category].items():
+                        if supplier.lower().strip() == data['supplier'].lower().strip():
                             result_text.append({
                                         'company': company,
                                         'warehouse': warehouse,
@@ -330,7 +332,7 @@ class FindAProduct:
         for company in self.companies:
             for warehouse in self.companies[company]:
                 for category in self.companies[company][warehouse]:
-                    for product, data in self.companies[company][warehouse][category]:
+                    for product, data in self.companies[company][warehouse][category].items():
                         if min_price <= data['price'] <= max_price:
                             result_text.append({
                                         'company': company,
@@ -350,7 +352,7 @@ class FindAProduct:
         for company in self.companies:
             for warehouse in self.companies[company]:
                 for category in self.companies[company][warehouse]:
-                    for product, data in self.companies[company][warehouse][category]:
+                    for product, data in self.companies[company][warehouse][category].items():
                         if min_qty <= data['quantity'] <= max_qty:
                             result_text.append({
                                         'company': company,
