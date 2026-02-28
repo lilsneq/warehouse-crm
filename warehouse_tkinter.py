@@ -111,11 +111,13 @@ def add_product_gui():
 
 
 def export_to_file():
-    print("Функция экспорта будет добавлена")
+    messagebox.showinfo("Инфо", "Функция экспорта будет добавлена позже")
+    print("Функция экспорта будет добавлена позже")
 
 
 def search_products():
-    print("Функция поиска будет добавлена")
+    messagebox.showinfo("Инфо", "Функция экспорта будет добавлена позже")
+    print("Функция поиска будет добавлена позже")
 
 
 # Создание главного окна
@@ -131,14 +133,25 @@ title.pack(pady=10)
 btn_frame = ttk.Frame(root)
 btn_frame.pack(pady=10)
 
-btn1 = ttk.Button(btn_frame, text="📦 Показать товары", command=lambda: show_products(companies_for_warehouse))
-btn1.pack(side=tk.LEFT, padx=5)
+btn_show = ttk.Button(btn_frame, text="📦 Показать товары",
+                      command=lambda: show_products(companies_for_warehouse))
+btn_show.pack(side=tk.LEFT, padx=5)
 
-btn2 = ttk.Button(btn_frame, text="➕ Добавить товар", command=add_product_gui)
-btn2.pack(side=tk.LEFT, padx=5)
+btn_add = ttk.Button(btn_frame, text="➕ Добавить товар", command=add_product_gui)
+btn_add.pack(side=tk.LEFT, padx=5)
 
-btn3 = ttk.Button(btn_frame, text="🚪 Выход", command=root.destroy)
-btn3.pack(side=tk.LEFT, padx=5)
+btn_refresh = ttk.Button(btn_frame, text="🔄 Обновить",
+                         command=lambda: show_products(companies_for_warehouse))
+btn_refresh.pack(side=tk.LEFT, padx=5)
+
+btn_export = ttk.Button(btn_frame, text="💾 Экспорт", command=export_to_file)
+btn_export.pack(side=tk.LEFT, padx=5)
+
+btn_search = ttk.Button(btn_frame, text="🔍 Поиск", command=search_products)
+btn_search.pack(side=tk.LEFT, padx=5)
+
+btn_exit = ttk.Button(btn_frame, text="🚪 Выход", command=root.destroy)
+btn_exit.pack(side=tk.LEFT, padx=5)
 
 # Текстовое поле для вывода
 text_area = scrolledtext.ScrolledText(root, width=70, height=40, font=("Courier New", 20), wrap=tk.NONE, xscrollcommand=True)
@@ -146,16 +159,7 @@ text_area.pack(pady=10)
 
 
 
-# Добавить в основное окно
-button_frame = tk.Frame(root)
-button_frame.pack(fill=tk.X)
 
-tk.Button(button_frame, text="🔄 Обновить",
-          command=lambda: show_products(companies_for_warehouse)).pack(side=tk.LEFT)
-tk.Button(button_frame, text="💾 Экспорт",
-          command=export_to_file).pack(side=tk.LEFT)  # нужно создать функцию
-tk.Button(button_frame, text="🔍 Поиск",
-          command=search_products).pack(side=tk.LEFT)  # нужно создать функцию
 
 
 
