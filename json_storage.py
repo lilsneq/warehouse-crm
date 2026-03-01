@@ -15,7 +15,7 @@ class JSONStorage:
                 filepath = filedialog.asksaveasfilename(defaultextension=".json")
 
                 if not filepath:
-                    print("No file selected")
+                    return False, "Файл не выбран"
 
             with open(filepath, "w", encoding='utf-8') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
@@ -44,7 +44,7 @@ class JSONStorage:
                 return True, data
 
         except TypeError as e:
-            print(f"Ошибка типа данных: {e}")
+            return False, f"Ошибка типа данных: {str(e)}"
 
         except Exception as e:
             return False, f'Ошибка: {str(e)}'
