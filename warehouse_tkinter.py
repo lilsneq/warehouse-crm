@@ -123,82 +123,131 @@ def search_products():
     """Главное окно поиска"""
     search_window = tk.Toplevel(root)
     search_window.title("🔍 Поиск товаров")
-    search_window.geometry("500x600")
+    search_window.geometry("600x700")
 
-    # Поле ввода для поиска по названию
-    tk.Label(search_window, text="Поиск по названию:").pack(pady=5)
-    name_entry = tk.Entry(search_window)
-    name_entry.pack()
-    tk.Button(search_window, text="Искать по названию",
-              command=lambda: search_by_name(name_entry.get())).pack(pady=5)
+    # Создаем один экземпляр finder для всего окна поиска
+    finder = FindAProduct(companies_for_warehouse)
+
+    # Фрейм для критериев
+    criteria_frame = ttk.LabelFrame(search_window, text="Критерии поиска", padding=10)
+    criteria_frame.pack(fill="both", expand=True, padx=10, pady=5)
+
+    # Поиск по названию
+    tk.Label(criteria_frame, text="Поиск по названию:").grid(row=0, column=0, sticky="w", pady=5)
+    name_entry = tk.Entry(criteria_frame, width=30)
+    name_entry.grid(row=0, column=1, pady=5, padx=5)
 
     # Поиск по компании
-    tk.Label(search_window, text="Поиск по компании:").pack(pady=5)
-    company_entry = tk.Entry(search_window)
-    company_entry.pack()
-    tk.Button(search_window, text="Искать по компании",
-              command=lambda: search_by_company(company_entry.get())).pack(pady=5)
+    tk.Label(criteria_frame, text="Поиск по компании:").grid(row=1, column=0, sticky="w", pady=5)
+    company_entry = tk.Entry(criteria_frame, width=30)
+    company_entry.grid(row=1, column=1, pady=5, padx=5)
 
     # Поиск по поставщику
-    tk.Label(search_window, text="Поиск по поставщику:").pack(pady=5)
-    supplier_entry = tk.Entry(search_window)
-    supplier_entry.pack()
-    tk.Button(search_window, text="Искать по поставщику",
-              command=lambda: search_by_supplier(supplier_entry.get())).pack(pady=5)
+    tk.Label(criteria_frame, text="Поиск по поставщику:").grid(row=2, column=0, sticky="w", pady=5)
+    supplier_entry = tk.Entry(criteria_frame, width=30)
+    supplier_entry.grid(row=2, column=1, pady=5, padx=5)
 
     # Поиск по цене
-    tk.Label(search_window, text="Диапазон цены:").pack(pady=5)
-    frame_price = tk.Frame(search_window)
-    frame_price.pack()
-    min_price = tk.Entry(frame_price, width=10)
-    min_price.pack(side=tk.LEFT, padx=5)
-    tk.Label(frame_price, text="—").pack(side=tk.LEFT)
-    max_price = tk.Entry(frame_price, width=10)
-    max_price.pack(side=tk.LEFT, padx=5)
-    tk.Button(search_window, text="Искать по цене",
-              command=lambda: search_by_price(int(min_price.get()), int(max_price.get()))).pack(pady=5)
+    tk.Label(criteria_frame, text="Диапазон цены:").grid(row=3, column=0, sticky="w", pady=5)
+    price_frame = tk.Frame(criteria_frame)
+    price_frame.grid(row=3, column=1, pady=5, padx=5)
+
+    min_price = tk.Entry(price_frame, width=10)
+    min_price.pack(side=tk.LEFT)
+    tk.Label(price_frame, text="—").pack(side=tk.LEFT, padx=5)
+    max_price = tk.Entry(price_frame, width=10)
+    max_price.pack(side=tk.LEFT)
 
     # Поиск по количеству
-    tk.Label(search_window, text="Диапазон количества:").pack(pady=5)
-    frame_qty = tk.Frame(search_window)
-    frame_qty.pack()
-    min_qty = tk.Entry(frame_qty, width=10)
-    min_qty.pack(side=tk.LEFT, padx=5)
-    tk.Label(frame_qty, text="—").pack(side=tk.LEFT)
-    max_qty = tk.Entry(frame_qty, width=10)
-    max_qty.pack(side=tk.LEFT, padx=5)
-    tk.Button(search_window, text="Искать по количеству",
-              command=lambda: search_by_quantity(int(min_qty.get()), int(max_qty.get()))).pack(pady=5)
+    tk.Label(criteria_frame, text="Диапазон количества:").grid(row=4, column=0, sticky="w", pady=5)
+    qty_frame = tk.Frame(criteria_frame)
+    qty_frame.grid(row=4, column=1, pady=5, padx=5)
+
+    min_qty = tk.Entry(qty_frame, width=10)
+    min_qty.pack(side=tk.LEFT)
+    tk.Label(qty_frame, text="—").pack(side=tk.LEFT, padx=5)
+    max_qty = tk.Entry(qty_frame, width=10)
+    max_qty.pack(side=tk.LEFT)
+
+    # Кнопка сброса
+    tk.Button(criteria_frame, text="🔄 Сбросить критерии",
+              command=lambda: reset_criteria(finder, [name_entry, company_entry, supplier_entry,
+                                                      min_price, max_price, min_qty, max_qty])).grid(row=5, column=0,
+                                                                                                     columnspan=2,
+                                                                                                     pady=10)
+
+    # Функция применения всех критериев
+    def apply_criteria():
+        # Устанавливаем критерии через setter'ы
+        finder.name = name_entry.get()
+        finder.company = company_entry.get()
+        finder.supplier = supplier_entry.get()
+
+        # Обработка цены
+        try:
+            min_p = int(min_price.get()) if min_price.get() else 0
+            max_p = int(max_price.get()) if max_price.get() else float('inf')
+            finder.price_range = (min_p, max_p)
+        except ValueError:
+            finder.price_range = (0, float('inf'))
+
+        # Обработка количества
+        try:
+            min_q = int(min_qty.get()) if min_qty.get() else 0
+            max_q = int(max_qty.get()) if max_qty.get() else float('inf')
+            finder.quantity_range = (min_q, max_q)
+        except ValueError:
+            finder.quantity_range = (0, float('inf'))
+
+        # Получаем результаты через getter
+        results = finder.results
+
+        # Формируем заголовок с активными критериями
+        active_criteria = []
+        if finder.name:
+            active_criteria.append(f"название: '{finder.name}'")
+        if finder.company:
+            active_criteria.append(f"компания: '{finder.company}'")
+        if finder.supplier:
+            active_criteria.append(f"поставщик: '{finder.supplier}'")
+        if finder.price_range != (0, float('inf')):
+            min_p, max_p = finder.price_range
+            if max_p == float('inf'):
+                active_criteria.append(f"цена ≥ {min_p}")
+            else:
+                active_criteria.append(f"цена: {min_p}-{max_p}")
+        if finder.quantity_range != (0, float('inf')):
+            min_q, max_q = finder.quantity_range
+            if max_q == float('inf'):
+                active_criteria.append(f"количество ≥ {min_q}")
+            else:
+                active_criteria.append(f"количество: {min_q}-{max_q}")
+
+        title = "Результаты поиска"
+        if active_criteria:
+            title = f"Поиск по: {', '.join(active_criteria)}"
+
+        display_search_results(results, title)
+
+        # Закрываем окно поиска
+        search_window.destroy()
+
+    # Кнопки
+    button_frame = tk.Frame(search_window)
+    button_frame.pack(pady=10)
+
+    tk.Button(button_frame, text="🔍 Найти", command=apply_criteria,
+              bg="lightblue", width=15).pack(side=tk.LEFT, padx=5)
+    tk.Button(button_frame, text="❌ Отмена", command=search_window.destroy,
+              width=15).pack(side=tk.LEFT, padx=5)
 
 
-def search_by_name(name):
-    finder = FindAProduct(companies_for_warehouse)
-    results = finder.search_by_product_name(name)
-    display_search_results(results, f"Результаты поиска по названию '{name}'")
-
-
-def search_by_company(company):
-    finder = FindAProduct(companies_for_warehouse)
-    results = finder.search_by_company(company)
-    display_search_results(results, f"Товары компании '{company}'")
-
-
-def search_by_supplier(supplier):
-    finder = FindAProduct(companies_for_warehouse)
-    results = finder.search_by_supplier(supplier)
-    display_search_results(results, f"Товары поставщика '{supplier}'")
-
-
-def search_by_price(min_p, max_p):
-    finder = FindAProduct(companies_for_warehouse)
-    results = finder.search_by_price_range(min_p, max_p)
-    display_search_results(results, f"Товары от {min_p} до {max_p} ₽")
-
-
-def search_by_quantity(min_q, max_q):
-    finder = FindAProduct(companies_for_warehouse)
-    results = finder.search_by_quantity_range(min_q, max_q)
-    display_search_results(results, f"Товары от {min_q} до {max_q} шт")
+def reset_criteria(finder, entries):
+    """Сброс всех критериев"""
+    finder.reset()
+    for entry in entries:
+        entry.delete(0, tk.END)
+    messagebox.showinfo("Сброс", "Все критерии сброшены")
 
 
 def display_search_results(results, title):
@@ -211,8 +260,9 @@ def display_search_results(results, title):
     text_area.insert(tk.END, f"{'=' * 70}\n\n", "company")
 
     if not results:
-        text_area.insert(tk.END, "Ничего не найдено\n")
+        text_area.insert(tk.END, "❌ Ничего не найдено\n")
     else:
+        text_area.insert(tk.END, f"✅ Найдено товаров: {len(results)}\n\n")
         for item in results:
             text_area.insert(tk.END,
                              f"• {item['product']}: {item['quantity']} шт, {item['price']} ₽\n"
