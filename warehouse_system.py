@@ -1,7 +1,7 @@
 # Иерархия: Компания → Склад → Категория → Товар
 # Система управления складом версия 2.0
 from json_storage import JSONStorage
-from tkinter import messagebox
+
 
 
 companies_for_warehouse = {
@@ -102,6 +102,7 @@ class ProductAdd:
         """Добавить новый товар"""
 
         global companies_for_warehouse
+        storage = JSONStorage()
 
         if name_company not in companies_for_warehouse:
             companies_for_warehouse[name_company] = {}
@@ -112,6 +113,7 @@ class ProductAdd:
 
         if name_quantity <= 0:
             return (False, "Количество должно быть положительным")
+
 
         #если товар всё таки есть
         if name_product in companies_for_warehouse[name_company][name_warehouse][name_category]:
@@ -126,6 +128,7 @@ class ProductAdd:
             'price': name_price,
             'supplier': name_supplier
                     }
+        storage.save_data_json(companies_for_warehouse)
         return (True, 'Товар добавлен')
 
 
@@ -168,45 +171,36 @@ class ProductSell:
         self._check_if_empty_and_delete()
         return True
 
-
-
     def _check_company(self):
         """Проверка компании"""
         return self.name_company in companies_for_warehouse
-
 
     def _check_warehouse(self):
         """Проверка склада"""
         return self.name_warehouse in companies_for_warehouse[self.name_company]
 
-
     def _check_category(self):
         """Проверка категории"""
         return self.name_category in companies_for_warehouse[self.name_company][self.name_warehouse]
 
-
     def _check_product(self):
         """Проверка продукта"""
         return self.name_product in companies_for_warehouse[self.name_company][self.name_warehouse][self.name_category]
-
 
     def _check_quantity(self):
         """Проверка количества"""
         product = companies_for_warehouse[self.name_company][self.name_warehouse][self.name_category][self.name_product]['quantity']
         return self.name_quantity <= product
 
-
     def _update_quantity(self):
         """Вычитание товара из количества"""
         product = companies_for_warehouse[self.name_company][self.name_warehouse][self.name_category][self.name_product]
         product["quantity"] -= self.name_quantity
 
-
     def _check_if_empty_and_delete(self):
         """Удаление товара если его меньше 0"""
         if companies_for_warehouse[self.name_company][self.name_warehouse][self.name_category][self.name_product]["quantity"] <= 0:
             del companies_for_warehouse[self.name_company][self.name_warehouse][self.name_category][self.name_product]
-
 
 
 class FindSupplier:
@@ -259,12 +253,19 @@ class ViewAllProducts:
 
 class FindAProduct:
     """Поиск продукта по складу"""
-    def __init__(self, companies_data):
+    def __init__(self, companies_data: dict):
         self.companies = companies_data
 
 
-    def search_by_product_name(self, name):
-        """Поиск названия"""
+    def search_by_product_name(self, name: str):
+        """search by name by warehouse
+        Searches through the company data structure.
+        Args:
+            name (str): Name of the product to search for
+        Returns:
+            List: Contains a dictionary including all the names found.
+        """
+
         result_text = []
         for company in self.companies:
             for warehouse in self.companies[company]:
@@ -283,8 +284,15 @@ class FindAProduct:
         return result_text
 
 
-    def search_by_company(self, company):
-        """все товары компании"""
+    def search_by_company(self, company: str):
+        """withdrawal of all company products
+        Searches through the company data structure.
+        Args:
+            company (str): Name of the company to search for
+        returns:
+            list: Contains a dictionary that includes all the company's products
+        """
+
         result_text = []
         companies_lower = {k.lower(): k for k in self.companies}
         if company.lower() in companies_lower:
@@ -305,8 +313,15 @@ class FindAProduct:
         return result_text
 
 
-    def search_by_supplier(self, supplier):
-        """поиск по поставщику"""
+    def search_by_supplier(self, supplier: str):
+        """search by supplier
+        Searches through the company data structure.
+        Args:
+            supplier (str): Name of the supplier to search for
+        Returns:
+            list: it contains a  dictionary containing all products from a specified supplier.
+        """
+
         result_text = []
         for company in self.companies:
             for warehouse in self.companies[company]:
@@ -325,8 +340,16 @@ class FindAProduct:
         return result_text
 
 
-    def search_by_price_range(self, min_price, max_price):
-        """товары в ценовом диапазоне"""
+    def search_by_price_range(self, min_price, max_price: int):
+        """search for products by price range
+        Searches through the company data structure.
+        Args:
+            min_price (int): Minimum price threshold (inclusive)
+            max_price (int): Maximum price threshold (inclusive)
+        Returns:
+            list: it contains а dictionary containing all products within the price range.
+        """
+
         result_text = []
         for company in self.companies:
             for warehouse in self.companies[company]:
@@ -345,8 +368,15 @@ class FindAProduct:
         return result_text
 
 
-    def search_by_quantity_range(self, min_qty, max_qty):
-        """товары по количеству"""
+    def search_by_quantity_range(self, min_qty: int, max_qty: int):
+        """Search for a product by quantity in stock
+        Searches through the company data structure.
+        Args:
+            min_qty (int): Minimum quantity threshold (inclusive)
+            max_qty (int): Maximum quantity threshold (inclusive)
+        Returns:
+            list: it contains a  dictionary containing all products with quantities in the specified range
+        """
         result_text = []
         for company in self.companies:
             for warehouse in self.companies[company]:
@@ -365,8 +395,26 @@ class FindAProduct:
         return result_text
 
 
+def load_data_from_file():
+    """Загрузка данных из JSON файла при запуске"""
+    global companies_for_warehouse
+    storage = JSONStorage()
+    filepath = 'warehouse_data.json'
+    success, result = storage.load_data()
+
+    if success and result:
+        companies_for_warehouse = result
+        print("Данные загружены из JSON")
+    else:
+        # оставляем тестовые данные
+        print("Используются тестовые данные")
+
 def export_to_file():
     """Сохранение данных в JSON файл (вызывается из GUI)"""
+    global companies_for_warehouse
     storage = JSONStorage()
     success, message = storage.save_data_json(companies_for_warehouse)
     return success, message
+
+
+load_data_from_file()

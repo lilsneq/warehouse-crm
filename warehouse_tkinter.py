@@ -288,8 +288,6 @@ text_area.pack(pady=10)
 
 
 
-# Вызов загрузки json
-load_data_on_start()
 
 print("Окно создано")
 root.mainloop()
