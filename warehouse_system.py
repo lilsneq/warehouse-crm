@@ -255,23 +255,25 @@ class FindAProduct:
     """Поиск продукта по складу"""
     def __init__(self, companies_data: dict):
         self.companies = companies_data
+        self._search_name = ""
+        self._search_company = ""
+        self._search_supplier = ""
+        self._min_price = 0
+        self._max_price = float('inf')
+        self._min_qty = 0
+        self._max_qty = float('inf')
+        self._last_results = []
 
-
-    def search_by_product_name(self, name: str):
-        """search by name by warehouse
-        Searches through the company data structure.
-        Args:
-            name (str): Name of the product to search for
-        Returns:
-            List: Contains a dictionary including all the names found.
-        """
-
+    @property
+    def results(self):
+        """Возвращение результатов по критериям поиска"""
         result_text = []
         for company in self.companies:
             for warehouse in self.companies[company]:
                 for category in self.companies[company][warehouse]:
                     for product,data in self.companies[company][warehouse][category].items():
-                        if name.lower().strip() == product.lower().strip():
+
+                        if self._matches_criteria(product, data):
                             result_text.append({
                                         'company': company,
                                         'warehouse': warehouse,
@@ -281,118 +283,85 @@ class FindAProduct:
                                         'price': data['price'],
                                         'supplier': data['supplier']
                                     })
+        self._last_results = result_text
         return result_text
 
+    def _matches_criteria(self, product, data):
+        """Проверка соответствия всем критериям"""
+        # Поиск по названию
+        if self._search_name and self._search_name.lower().strip() != product.lower().strip():
+            return False
 
-    def search_by_company(self, company: str):
-        """withdrawal of all company products
-        Searches through the company data structure.
-        Args:
-            company (str): Name of the company to search for
-        returns:
-            list: Contains a dictionary that includes all the company's products
-        """
+        # Поиск по компании
+        if self._search_company:
+            companies_lower = {k.lower(): k for k in self.companies}
+            if self._search_company.lower() not in companies_lower:
+                return False
 
-        result_text = []
-        companies_lower = {k.lower(): k for k in self.companies}
-        if company.lower() in companies_lower:
-            real_company = companies_lower[company.lower()]
-            for warehouse in self.companies[real_company]:
-                for category in self.companies[real_company][warehouse]:
-                    for product,data in self.companies[real_company][warehouse][category].items():
-                        result_text.append({
-                            'company': real_company,
-                            'warehouse': warehouse,
-                            'category': category,
-                            'product': product,
-                            'quantity': data['quantity'],
-                            'price': data['price'],
-                            'supplier': data['supplier']
-                        })
+        # Поиск по поставщику
+        if self._search_supplier and self._search_supplier.lower().strip() != data['supplier'].lower().strip():
+            return False
 
-        return result_text
+        # Поиск по цене
+        if not (self._min_price <= data['price'] <= self._max_price):
+            return False
+
+        # Поиск по количеству
+        if not (self._min_qty <= data['quantity'] <= self._max_qty):
+            return False
+
+        return True
 
 
-    def search_by_supplier(self, supplier: str):
-        """search by supplier
-        Searches through the company data structure.
-        Args:
-            supplier (str): Name of the supplier to search for
-        Returns:
-            list: it contains a  dictionary containing all products from a specified supplier.
-        """
+    @property
+    def name(self) -> str:
+        return self._search_name
 
-        result_text = []
-        for company in self.companies:
-            for warehouse in self.companies[company]:
-                for category in self.companies[company][warehouse]:
-                    for product, data in self.companies[company][warehouse][category].items():
-                        if supplier.lower().strip() == data['supplier'].lower().strip():
-                            result_text.append({
-                                        'company': company,
-                                        'warehouse': warehouse,
-                                        'category': category,
-                                        'product': product,
-                                        'quantity': data['quantity'],
-                                        'price': data['price'],
-                                        'supplier': data['supplier']
-                                    })
-        return result_text
+    @name.setter
+    def name(self, name: str) -> None:
+        self._search_name = name
 
+    @property
+    def company(self) -> str:
+        return self._search_company
 
-    def search_by_price_range(self, min_price, max_price: int):
-        """search for products by price range
-        Searches through the company data structure.
-        Args:
-            min_price (int): Minimum price threshold (inclusive)
-            max_price (int): Maximum price threshold (inclusive)
-        Returns:
-            list: it contains а dictionary containing all products within the price range.
-        """
+    @company.setter
+    def company(self, company: str) -> None:
+        self._search_company = company
 
-        result_text = []
-        for company in self.companies:
-            for warehouse in self.companies[company]:
-                for category in self.companies[company][warehouse]:
-                    for product, data in self.companies[company][warehouse][category].items():
-                        if min_price <= data['price'] <= max_price:
-                            result_text.append({
-                                        'company': company,
-                                        'warehouse': warehouse,
-                                        'category': category,
-                                        'product': product,
-                                        'quantity': data['quantity'],
-                                        'price': data['price'],
-                                        'supplier': data['supplier']
-                                    })
-        return result_text
+    @property
+    def supplier(self) -> str:
+        return self._search_supplier
 
+    @supplier.setter
+    def supplier(self, supplier: str) -> None:
+        self._search_supplier = supplier
 
-    def search_by_quantity_range(self, min_qty: int, max_qty: int):
-        """Search for a product by quantity in stock
-        Searches through the company data structure.
-        Args:
-            min_qty (int): Minimum quantity threshold (inclusive)
-            max_qty (int): Maximum quantity threshold (inclusive)
-        Returns:
-            list: it contains a  dictionary containing all products with quantities in the specified range
-        """
-        result_text = []
-        for company in self.companies:
-            for warehouse in self.companies[company]:
-                for category in self.companies[company][warehouse]:
-                    for product, data in self.companies[company][warehouse][category].items():
-                        if min_qty <= data['quantity'] <= max_qty:
-                            result_text.append({
-                                        'company': company,
-                                        'warehouse': warehouse,
-                                        'category': category,
-                                        'product': product,
-                                        'quantity': data['quantity'],
-                                        'price': data['price'],
-                                        'supplier': data['supplier']
-                                    })
-        return result_text
+    @property
+    def price_range(self) -> tuple:
+        return self._min_price, self._max_price
+
+    @price_range.setter
+    def price_range(self, prices: tuple) -> None:
+        self._min_price, self._max_price = prices
+
+    @property
+    def quantity_range(self) -> tuple:
+        return self._min_qty, self._max_qty
+
+    @quantity_range.setter
+    def quantity_range(self, quantities: tuple) -> None:
+        self._min_qty, self._max_qty = quantities
+
+    def reset(self) -> None:
+        """сброс критерий"""
+        self._search_name = ""
+        self._search_company = ""
+        self._search_supplier = ""
+        self._min_price = 0
+        self._max_price = float('inf')
+        self._min_qty = 0
+        self._max_qty = float('inf')
 
 
 def load_data_from_file():
