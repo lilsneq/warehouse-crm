@@ -273,7 +273,7 @@ class FindAProduct:
                 for category in self.companies[company][warehouse]:
                     for product,data in self.companies[company][warehouse][category].items():
 
-                        if self._matches_criteria(product, data):
+                        if self._matches_criteria(company, product, data):
                             result_text.append({
                                         'company': company,
                                         'warehouse': warehouse,
@@ -286,36 +286,44 @@ class FindAProduct:
         self._last_results = result_text
         return result_text
 
-    def _matches_criteria(self, product, data):
+    def _matches_criteria(self, company: str, product: str, data: dict) -> bool:
         """Проверка соответствия всем критериям"""
+
         # Поиск по названию
-        if self._search_name and self._search_name.lower().strip() != product.lower().strip():
-            return False
+        if self._search_name:
+            name_match = self._search_name.lower().strip() == product.lower().strip()
+            if not name_match:
+                return False
 
         # Поиск по компании
         if self._search_company:
-            companies_lower = {k.lower(): k for k in self.companies}
-            if self._search_company.lower() not in companies_lower:
+            company_match = self._search_company.lower().strip() == company.lower().strip()
+            if not company_match:
                 return False
 
         # Поиск по поставщику
-        if self._search_supplier and self._search_supplier.lower().strip() != data['supplier'].lower().strip():
-            return False
+        if self._search_supplier:
+            supplier_match = self._search_supplier.lower().strip() == data['supplier'].lower().strip()
+            if not supplier_match:
+                return False
 
         # Поиск по цене
-        if not (self._min_price <= data['price'] <= self._max_price):
+        price_match = self._min_price <= data['price'] <= self._max_price
+        if not price_match:
             return False
 
         # Поиск по количеству
-        if not (self._min_qty <= data['quantity'] <= self._max_qty):
+        quantity_match = self._min_qty <= data['quantity'] <= self._max_qty
+        if not quantity_match:
             return False
 
+        # Если дошли до сюда - все проверки пройдены
         return True
 
 
     @property
     def name(self) -> str:
-        return self._search_name
+        return self._search_name.lower().strip()
 
     @name.setter
     def name(self, name: str) -> None:
@@ -323,7 +331,7 @@ class FindAProduct:
 
     @property
     def company(self) -> str:
-        return self._search_company
+        return self._search_company.lower().strip()
 
     @company.setter
     def company(self, company: str) -> None:
@@ -331,7 +339,7 @@ class FindAProduct:
 
     @property
     def supplier(self) -> str:
-        return self._search_supplier
+        return self._search_supplier.lower().strip()
 
     @supplier.setter
     def supplier(self, supplier: str) -> None:
