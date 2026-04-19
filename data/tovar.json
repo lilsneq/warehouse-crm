@@ -1,0 +1,90 @@
+{
+    "TechCorp": {
+        "main_warehouse": {
+            "electronics": {
+                "laptops": {
+                    "quantity": 150,
+                    "price": 800,
+                    "supplier": "Dell"
+                },
+                "phones": {
+                    "quantity": 300,
+                    "price": 500,
+                    "supplier": "Apple"
+                }
+            },
+            "components": {
+                "processors": {
+                    "quantity": 500,
+                    "price": 300,
+                    "supplier": "Intel"
+                },
+                "memory": {
+                    "quantity": 1000,
+                    "price": 100,
+                    "supplier": "Samsung"
+                }
+            }
+        },
+        "regional_warehouse": {
+            "electronics": {
+                "laptops": {
+                    "quantity": 50,
+                    "price": 800,
+                    "supplier": "Dell"
+                },
+                "monitors": {
+                    "quantity": 80,
+                    "price": 200,
+                    "supplier": "LG"
+                }
+            }
+        }
+    },
+    "BuildMaster": {
+        "central_warehouse": {
+            "materials": {
+                "bricks": {
+                    "quantity": 10000,
+                    "price": 1,
+                    "supplier": "BrickCo"
+                },
+                "cement": {
+                    "quantity": 5000,
+                    "price": 10,
+                    "supplier": "CementLtd"
+                }
+            },
+            "tools": {
+                "hammers": {
+                    "quantity": 200,
+                    "price": 15,
+                    "supplier": "ToolPro"
+                },
+                "drills": {
+                    "quantity": 150,
+                    "price": 80,
+                    "supplier": "Bosch"
+                }
+            }
+        }
+    },
+    "1": {
+        "1": {
+            "1": {
+                "1": {
+                    "quantity": 111,
+                    "price": 1,
+                    "supplier": "1"
+                }
+            },
+            "2": {
+                "2": {
+                    "quantity": 2,
+                    "price": 2,
+                    "supplier": "2"
+                }
+            }
+        }
+    }
+}
