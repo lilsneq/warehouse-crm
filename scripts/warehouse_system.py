@@ -1,6 +1,6 @@
 # Иерархия: Компания → Склад → Категория → Товар
 # Система управления складом версия 2.0
-from json_storage import JSONStorage
+from data.json_storage import JSONStorage
 
 
 
@@ -96,40 +96,57 @@ class ProductFindMax:
 
 
 class ProductAdd:
-    """ДОБАВЛЕНИЕ ТОВАРА"""
+    """method for adding a product to a dictionary"""
+    def __init__(self, companies_data: dict, storage=None):
+        """
+        Args:
+            companies_data (dict): dictionary with companies data
+            storage (dict): dictionary with storage data
+        """
+        self._companies = companies_data
+        self._storage = storage or JSONStorage()
+
     def add_a_new_product(self, name_company, name_warehouse, name_category, name_product,
-                         name_quantity, name_price, name_supplier):
-        """Добавить новый товар"""
+                         name_quantity, name_price, name_supplier) -> bool:
+        """
+        Args:
+            name_company (str): name of the company
+            name_warehouse (str): name of the warehouse
+            name_category (str): name of the category
+            name_product (str): name of the product
+            name_quantity (int): quantity of the product
+            name_price (int): price of the product
+            name_supplier (str): name of the supplier
+        Returns:
+            bool: True if the product was added
+        """
 
-        global companies_for_warehouse
-        storage = JSONStorage()
-
-        if name_company not in companies_for_warehouse:
-            companies_for_warehouse[name_company] = {}
-        if name_warehouse not in companies_for_warehouse[name_company]:
-            companies_for_warehouse[name_company][name_warehouse] = {}
-        if name_category not in companies_for_warehouse[name_company][name_warehouse]:
-            companies_for_warehouse[name_company][name_warehouse][name_category] = {}
+        if name_company not in self._companies:
+            self._companies[name_company] = {}
+        if name_warehouse not in self._companies[name_company]:
+            self._companies[name_company][name_warehouse] = {}
+        if name_category not in self._companies[name_company][name_warehouse]:
+            self._companies[name_company][name_warehouse][name_category] = {}
 
         if name_quantity <= 0:
-            return (False, "Количество должно быть положительным")
+            return False
 
+        products = self._companies[name_company][name_warehouse][name_category]
+        #If the item is still there, we will exchange it.
+        if name_product in products:
+            products[name_product]["quantity"] += name_quantity
+            products[name_product]['price'] = name_price
+            products[name_product]["supplier"] = name_supplier
+            return True
 
-        #если товар всё таки есть
-        if name_product in companies_for_warehouse[name_company][name_warehouse][name_category]:
-            companies_for_warehouse[name_company][name_warehouse][name_category][name_product]["quantity"] += name_quantity
-            companies_for_warehouse[name_company][name_warehouse][name_category][name_product]['price'] = name_price
-            companies_for_warehouse[name_company][name_warehouse][name_category][name_product]["supplier"] = name_supplier
-            return (True, 'Товар обновлён')
-
-        #если товара нет
-        companies_for_warehouse[name_company][name_warehouse][name_category][name_product] = {
+        # if there is no cheese, we create it
+        products[name_product] = {
             'quantity': name_quantity,
             'price': name_price,
             'supplier': name_supplier
-                    }
-        storage.save_data_json(companies_for_warehouse)
-        return (True, 'Товар добавлен')
+                        }
+        self._storage.save_data_json(self._companies)
+        return True
 
 
 class ProductSell:
@@ -233,26 +250,29 @@ class FindSupplier:
 class ViewAllProducts:
     """Просмотреть все товары с детальной информацией"""
     def __init__(self, companies_data):
-        self.companies = companies_data
+        self._companies = companies_data
 
-
+    # def _format_product(self, company, warehouse, category, product, data):
+    #     """защищённый метод для форматирования строки"""
+    #     total = data['quantity'] * data['price']
+    #     return (f"{company}/{warehouse}/{category}/{product}: {data['quantity']} шт"
+    #             f" × {data['price']} ₽ = {total} ₽ ({data['supplier']})\n")
 
     def view_all_products_with_detailed_information(self):
         """Просмотреть все товары"""
-        result_text = ""
-        for company in self.companies:
-            for warehouse in self.companies[company]:
-                for category in self.companies[company][warehouse]:
-                    for product in self.companies[company][warehouse][category]:
-                        data = self.companies[company][warehouse][category][product]
-                        result_text += f"{company}/{warehouse}/{category}/{product}: "
-                        result_text += f"{data['quantity']} шт × {data['price']} ₽ = {data['quantity'] * data['price']} ₽ "
-                        result_text += f"({data['supplier']})\n"
-        return result_text
+        result = ""
+        for company in self._companies:
+            for warehouse in self._companies[company]:
+                for category in self._companies[company][warehouse]:
+                    for product in self._companies[company][warehouse][category]:
+                        data = self._companies[company][warehouse][category][product]
+                        # result += self._format_product(company, warehouse, category, product, data)
+
+        return result
 
 
 class FindAProduct:
-    """Поиск продукта по складу"""
+    """filter search"""
     def __init__(self, companies_data: dict):
         self.companies = companies_data
         self._search_name = ""
@@ -265,8 +285,12 @@ class FindAProduct:
         self._last_results = []
 
     @property
-    def results(self):
-        """Возвращение результатов по критериям поиска"""
+    def results(self) -> list:
+        """
+        accepts and forms strings, int
+        Returns:
+            list: List of dictionaries with found products.
+        """
         result_text = []
         for company in self.companies:
             for warehouse in self.companies[company]:
@@ -287,40 +311,47 @@ class FindAProduct:
         return result_text
 
     def _matches_criteria(self, company: str, product: str, data: dict) -> bool:
-        """Проверка соответствия всем критериям"""
+        """
+        Checking that all criteria are met
+        Args:
+            company (str): Company name
+            product (str): Product name
+            data (dict): Product data (quantity, price, supplier)
+        Returns:
+            bool: True if the product meets all criteria, otherwise False
+        """
 
-        # Поиск по названию
+        # Search by name
         if self._search_name:
             name_match = self._search_name.lower().strip() == product.lower().strip()
             if not name_match:
                 return False
 
-        # Поиск по компании
+        # Search by company
         if self._search_company:
             company_match = self._search_company.lower().strip() == company.lower().strip()
             if not company_match:
                 return False
 
-        # Поиск по поставщику
+        # Search by supplier
         if self._search_supplier:
             supplier_match = self._search_supplier.lower().strip() == data['supplier'].lower().strip()
             if not supplier_match:
                 return False
 
-        # Поиск по цене
+        # Search by price
         price_match = self._min_price <= data['price'] <= self._max_price
         if not price_match:
             return False
 
-        # Поиск по количеству
+        # Search by quantity
         quantity_match = self._min_qty <= data['quantity'] <= self._max_qty
         if not quantity_match:
             return False
 
-        # Если дошли до сюда - все проверки пройдены
         return True
 
-
+    #getter and setter properties
     @property
     def name(self) -> str:
         return self._search_name.lower().strip()
@@ -362,7 +393,7 @@ class FindAProduct:
         self._min_qty, self._max_qty = quantities
 
     def reset(self) -> None:
-        """сброс критерий"""
+        """reset criterion"""
         self._search_name = ""
         self._search_company = ""
         self._search_supplier = ""
@@ -373,7 +404,7 @@ class FindAProduct:
 
 
 def load_data_from_file():
-    """Загрузка данных из JSON файла при запуске"""
+    """Loading data from a JSON file on startup"""
     global companies_for_warehouse
     storage = JSONStorage()
     filepath = 'warehouse_data.json'
@@ -383,11 +414,10 @@ def load_data_from_file():
         companies_for_warehouse = result
         print("Данные загружены из JSON")
     else:
-        # оставляем тестовые данные
         print("Используются тестовые данные")
 
 def export_to_file():
-    """Сохранение данных в JSON файл (вызывается из GUI)"""
+    """Saving data to a JSON file (called from the GUI)"""
     global companies_for_warehouse
     storage = JSONStorage()
     success, message = storage.save_data_json(companies_for_warehouse)
@@ -395,3 +425,6 @@ def export_to_file():
 
 
 load_data_from_file()
+
+
+

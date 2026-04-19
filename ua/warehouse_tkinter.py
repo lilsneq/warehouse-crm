@@ -2,16 +2,11 @@ import tkinter as tk
 import time
 from tkinter import messagebox
 from tkinter import ttk, scrolledtext
-from json_storage import JSONStorage
-from warehouse_system import (
-    ProductQuantity,
-    ProductSell,
+from data.json_storage import JSONStorage
+from scripts.warehouse_system import (
     FindAProduct,
-    FindSupplier,
     ProductAdd,
-    ViewAllProducts,
-    companies_for_warehouse,
-    export_to_file
+    companies_for_warehouse
 
 )
 
@@ -61,6 +56,7 @@ def add_product_gui():
     new_window = tk.Toplevel(root)
     new_window.title("Добавить")
     new_window.geometry("500x600")
+
     fields = [
         ("Компания:", "company"),
         ("Склад:", "warehouse"),
@@ -70,7 +66,6 @@ def add_product_gui():
         ("Цена:", "price"),
         ("Поставщик:", "supplier")
     ]
-    # Создать таблицу
 
     entries = {}
     for label_text, key in fields:
@@ -80,34 +75,52 @@ def add_product_gui():
         entries[key] = entry
 
     def save_product():
-        company = entries['company'].get()
-        warehouse = entries['warehouse'].get()
-        category = entries['category'].get()
-        product = entries['product'].get()
-        quantity = entries['quantity'].get()
-        price = entries['price'].get()
-        supplier = entries['supplier'].get()
+        # Получаем данные
+        company = entries['company'].get().strip()
+        warehouse = entries['warehouse'].get().strip()
+        category = entries['category'].get().strip()
+        product = entries['product'].get().strip()
+        quantity = entries['quantity'].get().strip()
+        price = entries['price'].get().strip()
+        supplier = entries['supplier'].get().strip()
 
+        # Проверка на пустые поля
         if not all([company, warehouse, category, product, quantity, price, supplier]):
-            print("Ошибка: все поля должны быть заполнены")
+            messagebox.showerror("Ошибка", "Все поля должны быть заполнены")
             return
 
-        adder = ProductAdd()
-        result = adder.add_a_new_product(company, warehouse, category, product,
-                                int(quantity), int(price), supplier)
+        # Проверка что количество и цена - числа
+        try:
+            quantity_int = int(quantity)
+            price_int = int(price)
+        except ValueError:
+            messagebox.showerror("Ошибка", "Количество и цена должны быть числами")
+            return
 
-        if result[0]:  # успех
-            messagebox.showinfo("Успех", result[1])
+        # ✅ Правильно: передаем companies_for_warehouse
+        adder = ProductAdd(companies_for_warehouse)
+
+        # ✅ Метод возвращает bool, а не tuple
+        success = adder.add_a_new_product(
+            company, warehouse, category, product,
+            quantity_int, price_int, supplier
+        )
+
+        if success:
+            messagebox.showinfo("Успех", "Товар успешно добавлен/обновлен")
             new_window.destroy()
-            show_products(companies_for_warehouse)
-        else:  # ошибка
-            messagebox.showerror("Ошибка", result[1])
+            show_products(companies_for_warehouse)  # обновляем отображение
+        else:
+            messagebox.showerror("Ошибка", "Не удалось добавить товар (проверьте количество)")
 
-        print(f"Товар добавлен: {product} в {company}/{warehouse}")
+    # Кнопки
+    button_frame = tk.Frame(new_window)
+    button_frame.pack(pady=20)
 
-
-    tk.Button(new_window, text="❌ Отмена", command=new_window.destroy).pack()
-    tk.Button(new_window, text="✅ Добавить", command=save_product).pack(pady=10)
+    tk.Button(button_frame, text="✅ Добавить", command=save_product,
+              bg="lightgreen", width=15).pack(side=tk.LEFT, padx=5)
+    tk.Button(button_frame, text="❌ Отмена", command=new_window.destroy,
+              bg="lightcoral", width=15).pack(side=tk.LEFT, padx=5)
 
 
 def export_to_file():
@@ -280,24 +293,24 @@ root.geometry("900x700")
 
 
 # ЗАГРУЗКА JSON ФАЙЛА ПРИ СТАРТЕ ПРОГРАММЫ
-def load_data_on_start():
-    storage = JSONStorage()
-
-    if messagebox.askyesno("Загрузка", "Загрузить данные из файла?"):
-        success, data = storage.load_data()
-        if success and data:
-            global companies_for_warehouse
-            companies_for_warehouse = data
-            messagebox.showinfo("Успех", f"Загружено {len(data)} компаний")  # опционально
-            print(f"Данные загружены из файла")
-
-        else:
-            messagebox.showerror("Ошибка", "Не удалось загрузить файл")
-            print("Ошибка при загрузки, используются данные по умолчанию")
-    else:
-        print("Используются данные по умолчанию")
-
-    show_products(companies_for_warehouse)
+# def load_data_on_start():
+#     storage = JSONStorage()
+#
+#     if messagebox.askyesno("Загрузка", "Загрузить данные из файла?"):
+#         success, data = storage.load_data()
+#         if success and data:
+#             global companies_for_warehouse
+#             companies_for_warehouse = data
+#             messagebox.showinfo("Успех", f"Загружено {len(data)} компаний")  # опционально
+#             print(f"Данные загружены из файла")
+#
+#         else:
+#             messagebox.showerror("Ошибка", "Не удалось загрузить файл")
+#             print("Ошибка при загрузки, используются данные по умолчанию")
+#     else:
+#         print("Используются данные по умолчанию")
+#
+#     show_products(companies_for_warehouse)
 
 
 
@@ -332,8 +345,6 @@ btn_exit.pack(side=tk.LEFT, padx=5)
 # Текстовое поле для вывода
 text_area = scrolledtext.ScrolledText(root, width=70, height=40, font=("Courier New", 20), wrap=tk.NONE, xscrollcommand=True)
 text_area.pack(pady=10)
-
-
 
 
 
