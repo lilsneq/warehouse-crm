@@ -11,7 +11,7 @@ env_path = BASE_DIR / '.env'
 load_dotenv(dotenv_path=env_path)
 
 
-def get_connection() -> psycopg2.connect:
+def get_connection():
     """ПОДКЛЮЧЕНИЕ К БАЗЕ ДАННЫХ"""
     url = os.getenv("DB_HOST")
     if not url:
@@ -21,6 +21,7 @@ def get_connection() -> psycopg2.connect:
 
     try:
         conn = psycopg2.connect(url)
+        print("БАЗА ДАННЫХ ПОДКЛЮЧЕНА")
         return conn
 
     except Exception as e:
