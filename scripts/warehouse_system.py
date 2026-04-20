@@ -96,7 +96,7 @@ class ProductFindMax:
 
 
 class ProductAdd:
-    """method for adding a product to a dictionary"""
+    """method for adding a product to a DB"""
     def __init__(self, companies_data: dict, storage=None):
         """
         Args:
