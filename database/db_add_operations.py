@@ -1,11 +1,9 @@
 #добавление в базу данных
-import psycopg2
 
-from database_connect import get_connection
+from database.database_connect import get_connection
 from datetime import datetime
 
 
-now = datetime.now()
 
 
 class AddOperations:
@@ -14,15 +12,17 @@ class AddOperations:
     def add_product(company, warehouse, category, product=None, quantity=0, price=0, supplier=None):
         """ДОБАВЛЕНИЕ ТОВАРА В БАЗУ ДАННЫХ"""
 
+        now = datetime.now()
+
         conn = get_connection()
         if not conn:
             return None
 
         query = """
-        INSERT INTO public.warehouse
-        (name_company, name_warehouse, name_category, name_product, quantity, price, supplier)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        RETURNING id;
+            INSERT INTO public.warehouse
+            (name_company, name_warehouse, name_category, name_product, quantity, price, supplier)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING id;
         """
         print(f'ЗАПРОС ОТПРАВЛЕН В БАЗУ ДАННЫХ ', now)
 
@@ -44,8 +44,7 @@ class AddOperations:
 
 
 if __name__ == '__main__':
-    #ТЕСТ ПРОВЕРКА
-    AddOperations.add_product('LG', 'Основной', 'Инструменты', 'ВИЛКА', 234, 900)
+    pass
 
 
 
